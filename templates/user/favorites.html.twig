@@ -1,0 +1,179 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Favorites - {{ parent() }}{% endblock %}
+
+{% block body %}
+<div class="animate-fade-in">
+    <h1 class="mb-4">My Favorites</h1>
+    
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-user-circle fa-5x text-primary"></i>
+                    </div>
+                    <h4>{{ app.user.firstName }} {{ app.user.lastName }}</h4>
+                    <p class="text-muted">{{ app.user.email }}</p>
+                </div>
+            </div>
+            
+            <div class="list-group mb-4">
+                <a href="{{ path('app_user_profile') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-user me-2"></i> Profile
+                </a>
+                <a href="{{ path('app_user_bookings') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-calendar-check me-2"></i> My Bookings
+                </a>
+                <a href="{{ path('app_user_favorites') }}" class="list-group-item list-group-item-action active">
+                    <i class="fas fa-heart me-2"></i> My Favorites
+                    <span class="badge bg-primary rounded-pill float-end">{{ app.user.favorites.count }}</span>
+                </a>
+                <a href="{{ path('app_user_reviews') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-star me-2"></i> My Reviews
+                    <span class="badge bg-primary rounded-pill float-end">{{ app.user.reviews.count }}</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Favorited Properties</h4>
+                </div>
+                <div class="card-body">
+                    {% if favorites|length > 0 %}
+                        <div class="row">
+                            {% for property in favorites %}
+                                <div class="col-md-6 mb-4 animate-slide-up" style="animation-delay: {{ loop.index * 0.1 }}s">
+                                    <div class="card property-card h-100">
+                                        <div class="position-relative">
+                                            {% if property.imageFilename %}
+                                                <img src="{{ asset('uploads/properties/' ~ property.imageFilename) }}" alt="{{ property.name }}" class="property-image">
+                                            {% else %}
+                                                <img src="https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="{{ property.name }}" class="property-image">
+                                            {% endif %}
+                                            
+                                            <button class="favorite-btn js-favorite-toggle" data-property-id="{{ property.id }}">
+                                                <i class="fas fa-heart"></i>
+                                            </button>
+                                            
+                                            <div class="card-img-overlay-bottom">
+                                                <h5 class="card-title mb-0">{{ property.name }}</h5>
+                                                <p class="mb-0"><i class="fas fa-map-marker-alt me-1"></i>{{ property.city }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <div>
+                                                    <span class="badge bg-primary">{{ property.propertyType.name }}</span>
+                                                </div>
+                                                <div class="fw-bold text-primary">
+                                                    €{{ property.pricePerNight|number_format(2, '.', ',') }} <small class="text-muted">/ night</small>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                {% if property.averageRating %}
+                                                    <div class="rating-stars">
+                                                        {% for i in 1..5 %}
+                                                            {% if i <= property.averageRating %}
+                                                                <i class="fas fa-star"></i>
+                                                            {% elseif i <= property.averageRating + 0.5 %}
+                                                                <i class="fas fa-star-half-alt"></i>
+                                                            {% else %}
+                                                                <i class="far fa-star"></i>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                        <small class="text-muted ms-1">({{ property.reviews.count }} reviews)</small>
+                                                    </div>
+                                                {% else %}
+                                                    <small class="text-muted">No reviews yet</small>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div class="d-grid gap-2">
+                                                <a href="{{ path('app_property_show', {'id': property.id}) }}" class="btn btn-outline-primary">
+                                                    <i class="fas fa-info-circle me-1"></i> View Details
+                                                </a>
+                                                <a href="{{ path('app_booking_new', {'id': property.id}) }}" class="btn btn-primary">
+                                                    <i class="fas fa-calendar-check me-1"></i> Book Now
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="far fa-heart fa-3x text-muted mb-3"></i>
+                            <h5>No favorites yet</h5>
+                            <p>Start exploring properties and add them to your favorites.</p>
+                            <a href="{{ path('app_home') }}" class="btn btn-primary">Explore Properties</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle favorite toggle buttons
+    const favoriteButtons = document.querySelectorAll('.js-favorite-toggle');
+    
+    favoriteButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const propertyId = this.getAttribute('data-property-id');
+            const card = this.closest('.col-md-6');
+            
+            fetch('/property/' + propertyId + '/toggle-favorite', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'removed') {
+                    // Animate and remove the card
+                    card.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.8)';
+                    
+                    setTimeout(() => {
+                        card.remove();
+                        
+                        // Check if there are no more favorites
+                        const remainingCards = document.querySelectorAll('.property-card');
+                        if (remainingCards.length === 0) {
+                            const cardBody = document.querySelector('.card-body');
+                            cardBody.innerHTML = `
+                                <div class="text-center py-5">
+                                    <i class="far fa-heart fa-3x text-muted mb-3"></i>
+                                    <h5>No favorites yet</h5>
+                                    <p>Start exploring properties and add them to your favorites.</p>
+                                    <a href="${window.location.origin}" class="btn btn-primary">Explore Properties</a>
+                                </div>
+                            `;
+                        }
+                        
+                        // Update the badge count
+                        const badgeCount = document.querySelector('.list-group-item.active .badge');
+                        let count = parseInt(badgeCount.textContent);
+                        badgeCount.textContent = count - 1;
+                    }, 500);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+});
+</script>
+{% endblock %}

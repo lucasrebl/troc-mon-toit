@@ -1,0 +1,13 @@
+{% for property in properties %}
+    <tr>
+        <td>{{ property.name }}</td>
+        <td>{{ property.propertyType.name }}</td>
+        <td>{{ property.city }}</td>
+        <td>€{{ property.pricePerNight|number_format(2, '.', ',') }}</td>
+        <td>
+            <a href="{{ path('app_admin_properties_edit', {'id': property.id}) }}" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-edit"></i>
+            </a>
+        </td>
+    </tr>
+{% endfor %}

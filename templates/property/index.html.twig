@@ -1,0 +1,204 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Properties - {{ parent() }}{% endblock %}
+
+{% block body %}
+<div class="animate-fade-in">
+    <h1 class="mb-4">Find Your Perfect Stay</h1>
+
+    <!-- Search and Filter Section -->
+    <div class="filter-section">
+        <form action="{{ path('app_home') }}" method="get">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" name="search" class="form-control" placeholder="Search properties"
+                            value="{{ filters.search ?? '' }}">
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                        <input type="text" name="city" class="form-control" placeholder="City"
+                            value="{{ filters.city ?? '' }}">
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter me-2"></i>Apply Filters
+                    </button>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-12">
+                    <a class="btn btn-link" data-bs-toggle="collapse" href="#advancedFilters" role="button"
+                        aria-expanded="false" aria-controls="advancedFilters">
+                        <i class="fas fa-sliders-h me-1"></i> Advanced Filters
+                    </a>
+                </div>
+            </div>
+
+            <div class="collapse mt-3" id="advancedFilters">
+                <div class="card card-body">
+                    <div class="row">
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <label for="minPrice" class="form-label">Min Price (€)</label>
+                            <input type="number" name="minPrice" id="minPrice" class="form-control"
+                                placeholder="Min price" value="{{ filters.minPrice ?? '' }}">
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <label for="maxPrice" class="form-label">Max Price (€)</label>
+                            <input type="number" name="maxPrice" id="maxPrice" class="form-control"
+                                placeholder="Max price" value="{{ filters.maxPrice ?? '' }}">
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <label for="propertyType" class="form-label">Property Type</label>
+                            {{ form_widget(filterForm.propertyType, {'attr': {'class': 'form-select'}}) }}
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6 mb-3">
+                            <h5>Equipment</h5>
+                            <div class="equipment-options p-3 border rounded bg-light">
+                                {{ form_widget(filterForm.equipment, {'attr': {'class': 'filter-options-list d-flex flex-column'}}) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h5>Services</h5>
+                            <div class="services-options p-3 border rounded bg-light">
+                                {{ form_widget(filterForm.services, {'attr': {'class': 'filter-options-list d-flex flex-column'}}) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Properties Section -->
+    <div class="row">
+        {% for property in properties %}
+        <div class="col-md-6 col-lg-4 mb-4 animate-slide-up" style="animation-delay: {{ loop.index * 0.1 }}s">
+            <div class="card property-card h-100">
+                <div class="position-relative">
+                    {% if property.imageFilename %}
+                    <img src="{{ asset('uploads/properties/' ~ property.imageFilename) }}" alt="{{ property.name }}"
+                        class="property-image">
+                    {% else %}
+                    <img src="https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+                        alt="{{ property.name }}" class="property-image">
+                    {% endif %}
+
+                    {% if app.user %}
+                    <button class="favorite-btn js-favorite-toggle" data-property-id="{{ property.id }}">
+                        {% if app.user.favorites.contains(property) %}
+                        <i class="fas fa-heart"></i>
+                        {% else %}
+                        <i class="far fa-heart"></i>
+                        {% endif %}
+                    </button>
+                    {% endif %}
+
+                    <div class="card-img-overlay-bottom">
+                        <h5 class="card-title mb-0">{{ property.name }}</h5>
+                        <p class="mb-0"><i class="fas fa-map-marker-alt me-1"></i>{{ property.city }}</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <span class="badge bg-primary">{{ property.propertyType.name }}</span>
+                        </div>
+                        <div class="fw-bold text-primary">
+                            €{{ property.pricePerNight|number_format(2, '.', ',') }} <small class="text-muted">/
+                                night</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {% if property.averageRating %}
+                        <div class="rating-stars">
+                            {% for i in 1..5 %}
+                            {% if i <= property.averageRating %} <i class="fas fa-star"></i>
+                                {% elseif i <= property.averageRating + 0.5 %} <i class="fas fa-star-half-alt"></i>
+                                    {% else %}
+                                    <i class="far fa-star"></i>
+                                    {% endif %}
+                                    {% endfor %}
+                                    <small class="text-muted ms-1">({{ property.reviews.count }} reviews)</small>
+                        </div>
+                        {% else %}
+                        <small class="text-muted">No reviews yet</small>
+                        {% endif %}
+                    </div>
+
+                    <p class="card-text text-truncate">{{ property.description }}</p>
+
+                    <div class="mb-3">
+                        {% for equipment in property.equipment|slice(0, 3) %}
+                        <div class="equipment-item mb-1">
+                            <i class="fas {{ equipment.icon ?? 'fa-check' }} me-1"></i>
+                            <small>{{ equipment.name }}</small>
+                        </div>
+                        {% endfor %}
+                        {% if property.equipment.count > 3 %}
+                        <div class="equipment-item">
+                            <small>+{{ property.equipment.count - 3 }} more</small>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <a href="{{ path('app_property_show', {'id': property.id}) }}"
+                        class="btn btn-outline-primary w-100">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>No properties found matching your criteria. Try adjusting your
+                filters.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Handle favorite toggle buttons
+        const favoriteButtons = document.querySelectorAll('.js-favorite-toggle');
+
+        favoriteButtons.forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                const propertyId = this.getAttribute('data-property-id');
+                const icon = this.querySelector('i');
+
+                fetch('/property/' + propertyId + '/toggle-favorite', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.isFavorite) {
+                            icon.classList.remove('far');
+                            icon.classList.add('fas');
+                        } else {
+                            icon.classList.remove('fas');
+                            icon.classList.add('far');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        });
+    });
+</script>
+{% endblock %}

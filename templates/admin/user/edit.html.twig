@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit User - {{ parent() }}{% endblock %}
+
+{% block body %}
+<div class="animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Edit User</h1>
+        <a href="{{ path('app_admin_users') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-1"></i> Back to List
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            {{ form_start(form) }}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        {{ form_label(form.firstName) }}
+                        {{ form_widget(form.firstName) }}
+                        {{ form_errors(form.firstName) }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_label(form.lastName) }}
+                        {{ form_widget(form.lastName) }}
+                        {{ form_errors(form.lastName) }}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.email) }}
+                    {{ form_widget(form.email) }}
+                    {{ form_errors(form.email) }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.phoneNumber) }}
+                    {{ form_widget(form.phoneNumber) }}
+                    {{ form_errors(form.phoneNumber) }}
+                </div>
+
+                <div class="mb-3">
+                    <h5>User Roles</h5>
+                    {{ form_widget(form.roles) }}
+                    {{ form_errors(form.roles) }}
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Update User
+                    </button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

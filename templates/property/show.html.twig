@@ -1,0 +1,216 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ property.name }} - {{ parent() }}{% endblock %}
+
+{% block body %}
+<div class="animate-fade-in">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>{{ property.name }}</h1>
+            <p class="text-muted">
+                <i class="fas fa-map-marker-alt me-1"></i> {{ property.address }}, {{ property.city }}
+            </p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            {% if app.user %}
+                <button class="btn {% if app.user.favorites.contains(property) %}btn-accent{% else %}btn-outline-accent{% endif %} js-favorite-toggle" data-property-id="{{ property.id }}">
+                    <i class="{% if app.user.favorites.contains(property) %}fas{% else %}far{% endif %} fa-heart me-1"></i>
+                    {% if app.user.favorites.contains(property) %}Remove from favorites{% else %}Add to favorites{% endif %}
+                </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row property-gallery mb-4">
+        <div class="col-md-8 mb-3">
+            {% if property.imageFilename %}
+                <img src="{{ asset('uploads/properties/' ~ property.imageFilename) }}" alt="{{ property.name }}" class="img-fluid rounded w-100" style="height: 400px; object-fit: cover;">
+            {% else %}
+                <img src="https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="{{ property.name }}" class="img-fluid rounded w-100" style="height: 400px; object-fit: cover;">
+            {% endif %}
+        </div>
+        <div class="col-md-4">
+            <div class="row">
+                <div class="col-6 col-md-12 mb-3">
+                    <img src="https://images.pexels.com/photos/1457842/pexels-photo-1457842.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Interior 1" class="img-fluid rounded w-100" style="height: 190px; object-fit: cover;">
+                </div>
+                <div class="col-6 col-md-12">
+                    <img src="https://images.pexels.com/photos/271795/pexels-photo-271795.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Interior 2" class="img-fluid rounded w-100" style="height: 190px; object-fit: cover;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="property-detail-section">
+                <h3>About this property</h3>
+                <div class="d-flex mb-3">
+                    <div class="me-4">
+                        <span class="badge bg-primary">{{ property.propertyType.name }}</span>
+                    </div>
+                    <div class="me-4">
+                        {% if property.averageRating %}
+                            <div class="rating-stars">
+                                {% for i in 1..5 %}
+                                    {% if i <= property.averageRating %}
+                                        <i class="fas fa-star"></i>
+                                    {% elseif i <= property.averageRating + 0.5 %}
+                                        <i class="fas fa-star-half-alt"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="ms-1">{{ property.averageRating|number_format(1) }}</span>
+                                <small class="text-muted ms-1">({{ property.reviews.count }} reviews)</small>
+                            </div>
+                        {% else %}
+                            <small class="text-muted">No reviews yet</small>
+                        {% endif %}
+                    </div>
+                </div>
+                <p>{{ property.description }}</p>
+            </div>
+
+            <div class="property-detail-section">
+                <h3>Equipment</h3>
+                <div class="row">
+                    {% for equipment in property.equipment %}
+                        <div class="col-md-4 mb-2">
+                            <div class="equipment-icon">
+                                <i class="fas {{ equipment.icon ?? 'fa-check' }} me-2"></i>
+                                {{ equipment.name }}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="col-12">
+                            <p class="text-muted">No equipment listed for this property.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="property-detail-section">
+                <h3>Services</h3>
+                <div class="row">
+                    {% for service in property.services %}
+                        <div class="col-md-4 mb-2">
+                            <div class="service-icon">
+                                <i class="fas {{ service.icon ?? 'fa-concierge-bell' }} me-2"></i>
+                                {{ service.name }}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="col-12">
+                            <p class="text-muted">No services listed for this property.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="property-detail-section">
+                <h3>Reviews</h3>
+                {% if property.reviews|length > 0 %}
+                    {% for review in property.reviews %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="mb-0">{{ review.user.firstName }} {{ review.user.lastName|first }}.</h5>
+                                    <small class="text-muted">{{ review.createdAt|date('M d, Y') }}</small>
+                                </div>
+                                <div class="rating-stars mb-2">
+                                    {% for i in 1..5 %}
+                                        {% if i <= review.rating %}
+                                            <i class="fas fa-star"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <p class="card-text">{{ review.comment }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No reviews yet. Be the first to leave a review after your stay!</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card sticky-top" style="top: 20px; z-index: 1;">
+                <div class="card-body">
+                    <h3 class="card-title">€{{ property.pricePerNight|number_format(2, '.', ',') }} <small class="text-muted">/ night</small></h3>
+                    <hr>
+                    {% if app.user %}
+                        <a href="{{ path('app_booking_new', {'id': property.id}) }}" class="btn btn-primary w-100 mb-3">
+                            <i class="fas fa-calendar-check me-1"></i> Book Now
+                        </a>
+                    {% else %}
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-info-circle me-1"></i> You need to <a href="{{ path('app_login') }}">login</a> to book this property.
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <h5>Availability</h5>
+                        <p class="text-muted">Check the calendar to see available dates.</p>
+                        <p><i class="fas fa-info-circle me-1 text-primary"></i> Prices may vary based on dates.</p>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-secondary">
+                            <i class="fas fa-share-alt me-1"></i> Share
+                        </button>
+                        <button class="btn btn-outline-secondary">
+                            <i class="fas fa-question-circle me-1"></i> Ask a Question
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle favorite toggle button
+    const favoriteToggle = document.querySelector('.js-favorite-toggle');
+    
+    if (favoriteToggle) {
+        favoriteToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const propertyId = this.getAttribute('data-property-id');
+            const icon = this.querySelector('i');
+            
+            fetch('/property/' + propertyId + '/toggle-favorite', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.isFavorite) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    this.classList.remove('btn-outline-accent');
+                    this.classList.add('btn-accent');
+                    this.innerHTML = '<i class="fas fa-heart me-1"></i> Remove from favorites';
+                } else {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                    this.classList.remove('btn-accent');
+                    this.classList.add('btn-outline-accent');
+                    this.innerHTML = '<i class="far fa-heart me-1"></i> Add to favorites';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    }
+});
+</script>
+{% endblock %}

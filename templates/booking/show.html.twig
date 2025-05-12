@@ -1,0 +1,139 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Booking Details - {{ parent() }}{% endblock %}
+
+{% block body %}
+<div class="animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Booking Details</h1>
+        <a href="{{ path('app_user_bookings') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-1"></i> Back to My Bookings
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            {% if booking.property.imageFilename %}
+                                <img src="{{ asset('uploads/properties/' ~ booking.property.imageFilename) }}" alt="{{ booking.property.name }}" class="img-fluid rounded">
+                            {% else %}
+                                <img src="https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="{{ booking.property.name }}" class="img-fluid rounded">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h3>{{ booking.property.name }}</h3>
+                            <p><i class="fas fa-map-marker-alt me-1"></i> {{ booking.property.city }}</p>
+                            <p class="mb-0">
+                                <span class="badge bg-primary">{{ booking.property.propertyType.name }}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Booking Information</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Check-in</h5>
+                            <p class="mb-0">
+                                <i class="fas fa-calendar-alt me-1 text-primary"></i>
+                                {{ booking.startDate|date('l, M d, Y') }}
+                            </p>
+                            <small class="text-muted">After 2:00 PM</small>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Check-out</h5>
+                            <p class="mb-0">
+                                <i class="fas fa-calendar-alt me-1 text-primary"></i>
+                                {{ booking.endDate|date('l, M d, Y') }}
+                            </p>
+                            <small class="text-muted">Before 11:00 AM</small>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Duration</h5>
+                            <p>{{ booking.numberOfNights }} nights</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Total Price</h5>
+                            <p>€{{ booking.totalPrice|number_format(2, '.', ',') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5>Property Amenities</h5>
+                            <div class="row">
+                                {% for equipment in booking.property.equipment %}
+                                    <div class="col-md-4 mb-2">
+                                        <div class="equipment-icon">
+                                            <i class="fas {{ equipment.icon ?? 'fa-check' }} me-2"></i>
+                                            {{ equipment.name }}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <h5>Available Services</h5>
+                            <div class="row">
+                                {% for service in booking.property.services %}
+                                    <div class="col-md-4 mb-2">
+                                        <div class="service-icon">
+                                            <i class="fas {{ service.icon ?? 'fa-concierge-bell' }} me-2"></i>
+                                            {{ service.name }}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card sticky-top" style="top: 20px;">
+                <div class="card-body">
+                    <h4>Actions</h4>
+                    <hr>
+
+                    {% if booking.startDate > date() %}
+                        <div class="d-grid gap-2 mb-4">
+                            <a href="{{ path('app_booking_cancel', {'id': booking.id}) }}" 
+                               class="btn btn-danger"
+                               onclick="return confirm('Are you sure you want to cancel this booking?')">
+                                <i class="fas fa-times-circle me-1"></i> Cancel Booking
+                            </a>
+                        </div>
+                    {% endif %}
+
+                    {% if booking.isCompletedStay and not booking.hasReviewed %}
+                        <div class="d-grid gap-2 mb-4">
+                            <a href="{{ path('app_review_new', {'id': booking.id}) }}" class="btn btn-primary">
+                                <i class="fas fa-star me-1"></i> Leave a Review
+                            </a>
+                        </div>
+                    {% endif %}
+
+                    <h5>Need Help?</h5>
+                    <p class="mb-1"><i class="fas fa-phone me-2 text-primary"></i> +33 123 456 789</p>
+                    <p><i class="fas fa-envelope me-2 text-primary"></i> support@trocmontoit.com</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

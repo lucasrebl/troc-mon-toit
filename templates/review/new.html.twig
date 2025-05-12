@@ -1,0 +1,128 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Leave a Review - {{ parent() }}{% endblock %}
+
+{% block body %}
+<div class="animate-fade-in">
+    <h1>Leave a Review</h1>
+    <h3>{{ property.name }}</h3>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            {% if property.imageFilename %}
+                                <img src="{{ asset('uploads/properties/' ~ property.imageFilename) }}" alt="{{ property.name }}" class="img-fluid rounded">
+                            {% else %}
+                                <img src="https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="{{ property.name }}" class="img-fluid rounded">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h5>{{ property.name }}</h5>
+                            <p><i class="fas fa-map-marker-alt me-1"></i> {{ property.city }}</p>
+                            <p>Your stay: {{ booking.startDate|date('M d, Y') }} - {{ booking.endDate|date('M d, Y') }}</p>
+                            <p class="mb-0">
+                                <span class="badge bg-primary">{{ property.propertyType.name }}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">Share Your Experience</h3>
+                    
+                    {{ form_start(form) }}
+                    
+                    <div class="mb-4">
+                        {{ form_label(form.rating) }}
+                        <div class="star-rating">
+                            {{ form_widget(form.rating) }}
+                        </div>
+                        {{ form_errors(form.rating) }}
+                    </div>
+                    
+                    <div class="mb-4">
+                        {{ form_label(form.comment) }}
+                        {{ form_widget(form.comment) }}
+                        {{ form_errors(form.comment) }}
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-paper-plane me-1"></i> Submit Review
+                        </button>
+                        <a href="{{ path('app_user_bookings') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Back to My Bookings
+                        </a>
+                    </div>
+                    
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Review Guidelines</h4>
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <h5>Helpful Tips</h5>
+                        <ul>
+                            <li>Be specific about what you liked and disliked</li>
+                            <li>Share your experience with the property's amenities</li>
+                            <li>Mention the cleanliness and condition of the property</li>
+                            <li>Describe the location and surroundings</li>
+                            <li>Provide context about your trip (business, family vacation, etc.)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-1"></i> Your honest feedback helps other travelers make informed decisions. Thank you for sharing your experience!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Enhance star rating UI
+    const ratingInputs = document.querySelectorAll('.star-rating input[type="radio"]');
+    const ratingLabels = document.querySelectorAll('.star-rating label');
+    
+    ratingInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            const rating = parseInt(this.value);
+            
+            ratingLabels.forEach((label, index) => {
+                const labelRating = 5 - index;
+                
+                if (labelRating <= rating) {
+                    label.innerHTML = '<i class="fas fa-star text-warning"></i> ' + 
+                                      (labelRating === 1 ? '1 star' : labelRating + ' stars');
+                } else {
+                    label.innerHTML = '<i class="far fa-star"></i> ' + 
+                                      (labelRating === 1 ? '1 star' : labelRating + ' stars');
+                }
+            });
+        });
+    });
+    
+    // Style the labels initially
+    ratingLabels.forEach((label, index) => {
+        const rating = 5 - index;
+        label.innerHTML = '<i class="far fa-star"></i> ' + 
+                          (rating === 1 ? '1 star' : rating + ' stars');
+    });
+});
+</script>
+{% endblock %}

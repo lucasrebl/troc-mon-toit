@@ -1,0 +1,182 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Book {{ property.name }} - {{ parent() }}{% endblock %}
+
+{% block body %}
+<div class="animate-fade-in">
+    <div class="row">
+        <div class="col-md-8">
+            <h1>Book Your Stay</h1>
+            <h3>{{ property.name }}</h3>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            {% if property.imageFilename %}
+                                <img src="{{ asset('uploads/properties/' ~ property.imageFilename) }}" alt="{{ property.name }}" class="img-fluid rounded">
+                            {% else %}
+                                <img src="https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="{{ property.name }}" class="img-fluid rounded">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h5>{{ property.name }}</h5>
+                            <p><i class="fas fa-map-marker-alt me-1"></i> {{ property.city }}</p>
+                            <p class="fw-bold text-primary">€{{ property.pricePerNight|number_format(2, '.', ',') }} <small class="text-muted">/ night</small></p>
+                            <p class="mb-0">
+                                <span class="badge bg-primary">{{ property.propertyType.name }}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">Select Your Dates</h3>
+                    
+                    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.startDate) }}
+                            {{ form_widget(form.startDate) }}
+                            <div class="invalid-feedback">
+                                {{ form_errors(form.startDate) }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.endDate) }}
+                            {{ form_widget(form.endDate) }}
+                            <div class="invalid-feedback">
+                                {{ form_errors(form.endDate) }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Choose your check-in and check-out dates. The total price will be calculated based on the number of nights.
+                    </div>
+                    
+                    <div id="price-calculation" class="mb-4 d-none">
+                        <h4>Price Calculation</h4>
+                        <div class="row">
+                            <div class="col-8">€{{ property.pricePerNight|number_format(2, '.', ',') }} x <span id="num-nights">0</span> nights</div>
+                            <div class="col-4 text-end">€<span id="total-price">0.00</span></div>
+                        </div>
+                        <hr>
+                        <div class="row fw-bold">
+                            <div class="col-8">Total</div>
+                            <div class="col-4 text-end">€<span id="grand-total">0.00</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-check-circle me-2"></i> Confirm Booking
+                        </button>
+                    </div>
+                    
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card sticky-top" style="top: 20px;">
+                <div class="card-body">
+                    <h4 class="card-title">Booking Summary</h4>
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <h5>Important Information</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-door-open me-2 text-primary"></i> Check-in after 2:00 PM</li>
+                            <li><i class="fas fa-door-closed me-2 text-primary"></i> Check-out before 11:00 AM</li>
+                            <li><i class="fas fa-ban me-2 text-primary"></i> No pets allowed</li>
+                            <li><i class="fas fa-smoking-ban me-2 text-primary"></i> No smoking</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h5>Property Highlights</h5>
+                        <div class="row">
+                            {% for equipment in property.equipment|slice(0, 6) %}
+                                <div class="col-6 mb-2">
+                                    <div class="equipment-icon">
+                                        <i class="fas {{ equipment.icon ?? 'fa-check' }} me-2"></i>
+                                        {{ equipment.name }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5>Need Help?</h5>
+                        <p class="mb-1"><i class="fas fa-phone me-2 text-primary"></i> +33 123 456 789</p>
+                        <p><i class="fas fa-envelope me-2 text-primary"></i> booking@trocmontoit.com</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const startDateInput = document.getElementById('booking_startDate');
+    const endDateInput = document.getElementById('booking_endDate');
+    const priceCalcDiv = document.getElementById('price-calculation');
+    const numNightsSpan = document.getElementById('num-nights');
+    const totalPriceSpan = document.getElementById('total-price');
+    const grandTotalSpan = document.getElementById('grand-total');
+    const pricePerNight = {{ property.pricePerNight }};
+    
+    function updatePriceCalculation() {
+        if (startDateInput.value && endDateInput.value) {
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(endDateInput.value);
+            
+            if (endDate > startDate) {
+                const diffTime = endDate.getTime() - startDate.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                const totalPrice = pricePerNight * diffDays;
+                
+                numNightsSpan.textContent = diffDays;
+                totalPriceSpan.textContent = totalPrice.toFixed(2);
+                grandTotalSpan.textContent = totalPrice.toFixed(2);
+                
+                priceCalcDiv.classList.remove('d-none');
+            }
+        }
+    }
+    
+    startDateInput.addEventListener('change', updatePriceCalculation);
+    endDateInput.addEventListener('change', updatePriceCalculation);
+    
+    // Form validation
+    const form = document.querySelector('.needs-validation');
+    
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        
+        form.classList.add('was-validated');
+    });
+});
+</script>
+<style>
+/* Ajoute ceci dans ton CSS global ou dans un bloc <style> */
+.card.sticky-top .card-body {
+    background: #fff;
+    z-index: 1;
+}
+</style>
+{% endblock %}

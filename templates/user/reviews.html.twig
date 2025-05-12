@@ -1,0 +1,99 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Reviews - {{ parent() }}{% endblock %}
+
+{% block body %}
+<div class="animate-fade-in">
+    <h1 class="mb-4">My Reviews</h1>
+    
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-user-circle fa-5x text-primary"></i>
+                    </div>
+                    <h4>{{ app.user.firstName }} {{ app.user.lastName }}</h4>
+                    <p class="text-muted">{{ app.user.email }}</p>
+                </div>
+            </div>
+            
+            <div class="list-group mb-4">
+                <a href="{{ path('app_user_profile') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-user me-2"></i> Profile
+                </a>
+                <a href="{{ path('app_user_bookings') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-calendar-check me-2"></i> My Bookings
+                </a>
+                <a href="{{ path('app_user_favorites') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-heart me-2"></i> My Favorites
+                    <span class="badge bg-primary rounded-pill float-end">{{ app.user.favorites.count }}</span>
+                </a>
+                <a href="{{ path('app_user_reviews') }}" class="list-group-item list-group-item-action active">
+                    <i class="fas fa-star me-2"></i> My Reviews
+                    <span class="badge bg-primary rounded-pill float-end">{{ app.user.reviews.count }}</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">My Reviews</h4>
+                </div>
+                <div class="card-body">
+                    {% if app.user.reviews|length > 0 %}
+                        {% for review in app.user.reviews %}
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            {% if review.property.imageFilename %}
+                                                <img src="{{ asset('uploads/properties/' ~ review.property.imageFilename) }}" alt="{{ review.property.name }}" class="img-fluid rounded">
+                                            {% else %}
+                                                <img src="https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="{{ review.property.name }}" class="img-fluid rounded">
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <h5 class="mb-1">{{ review.property.name }}</h5>
+                                                <small class="text-muted">{{ review.createdAt|date('M d, Y') }}</small>
+                                            </div>
+                                            
+                                            <div class="rating-stars mb-2">
+                                                {% for i in 1..5 %}
+                                                    {% if i <= review.rating %}
+                                                        <i class="fas fa-star"></i>
+                                                    {% else %}
+                                                        <i class="far fa-star"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                            
+                                            <p class="mb-2">{{ review.comment }}</p>
+                                            
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-map-marker-alt me-1 text-primary"></i>
+                                                <span>{{ review.property.city }}</span>
+                                                <span class="mx-2">•</span>
+                                                <span class="badge bg-primary">{{ review.property.propertyType.name }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="far fa-star fa-3x text-muted mb-3"></i>
+                            <h5>No reviews yet</h5>
+                            <p>After completing a stay, you can leave a review for the property.</p>
+                            <a href="{{ path('app_home') }}" class="btn btn-primary">Explore Properties</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

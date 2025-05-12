@@ -1,0 +1,97 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Review - {{ parent() }}{% endblock %}
+
+{% block body %}
+<div class="animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Edit Review</h1>
+        <a href="{{ path('app_admin_reviews') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-1"></i> Back to List
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    {% if review.property.imageFilename %}
+                        <img src="{{ asset('uploads/properties/' ~ review.property.imageFilename) }}" alt="{{ review.property.name }}" class="img-fluid rounded">
+                    {% else %}
+                        <img src="https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="{{ review.property.name }}" class="img-fluid rounded">
+                    {% endif %}
+                </div>
+                <div class="col-md-9">
+                    <h4>{{ review.property.name }}</h4>
+                    <p><i class="fas fa-map-marker-alt me-1"></i> {{ review.property.city }}</p>
+                    <p>Reviewed by: {{ review.user.firstName }} {{ review.user.lastName }}</p>
+                    <p>Date: {{ review.createdAt|date('M d, Y H:i') }}</p>
+                </div>
+            </div>
+
+            {{ form_start(form) }}
+                <div class="mb-4">
+                    {{ form_label(form.rating) }}
+                    <div class="star-rating">
+                        {{ form_widget(form.rating) }}
+                    </div>
+                    {{ form_errors(form.rating) }}
+                </div>
+
+                <div class="mb-4">
+                    {{ form_label(form.comment) }}
+                    {{ form_widget(form.comment) }}
+                    {{ form_errors(form.comment) }}
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Update Review
+                    </button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Enhance star rating UI
+    const ratingInputs = document.querySelectorAll('.star-rating input[type="radio"]');
+    const ratingLabels = document.querySelectorAll('.star-rating label');
+    
+    ratingInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            const rating = parseInt(this.value);
+            
+            ratingLabels.forEach((label, index) => {
+                const labelRating = 5 - index;
+                
+                if (labelRating <= rating) {
+                    label.innerHTML = '<i class="fas fa-star text-warning"></i> ' + 
+                                      (labelRating === 1 ? '1 star' : labelRating + ' stars');
+                } else {
+                    label.innerHTML = '<i class="far fa-star"></i> ' + 
+                                      (labelRating === 1 ? '1 star' : labelRating + ' stars');
+                }
+            });
+        });
+    });
+    
+    // Style the labels initially based on current rating
+    const currentRating = {{ review.rating }};
+    ratingLabels.forEach((label, index) => {
+        const labelRating = 5 - index;
+        if (labelRating <= currentRating) {
+            label.innerHTML = '<i class="fas fa-star text-warning"></i> ' + 
+                              (labelRating === 1 ? '1 star' : labelRating + ' stars');
+        } else {
+            label.innerHTML = '<i class="far fa-star"></i> ' + 
+                              (labelRating === 1 ? '1 star' : labelRating + ' stars');
+        }
+    });
+});
+</script>
+{% endblock %}

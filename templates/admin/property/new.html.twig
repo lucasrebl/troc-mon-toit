@@ -1,0 +1,122 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Property - {{ parent() }}{% endblock %}
+
+{% block body %}
+<div class="animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>New Property</h1>
+        <a href="{{ path('app_admin_properties') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-1"></i> Back to List
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            {{ form_start(form) }}
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            {{ form_label(form.name) }}
+                            {{ form_widget(form.name) }}
+                            {{ form_errors(form.name) }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(form.description) }}
+                            {{ form_widget(form.description) }}
+                            {{ form_errors(form.description) }}
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form_label(form.pricePerNight) }}
+                                {{ form_widget(form.pricePerNight) }}
+                                {{ form_errors(form.pricePerNight) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form_label(form.propertyType) }}
+                                {{ form_widget(form.propertyType) }}
+                                {{ form_errors(form.propertyType) }}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form_label(form.city) }}
+                                {{ form_widget(form.city) }}
+                                {{ form_errors(form.city) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form_label(form.address) }}
+                                {{ form_widget(form.address) }}
+                                {{ form_errors(form.address) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h5 class="mb-0">Equipment</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="equipment-list">
+                                    {{ form_widget(form.equipment) }}
+                                </div>
+                                {{ form_errors(form.equipment) }}
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Services</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="service-list">
+                                    {{ form_widget(form.services) }}
+                                </div>
+                                {{ form_errors(form.services) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Create Property
+                    </button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+<style>
+.equipment-list .form-check,
+.service-list .form-check {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s;
+}
+
+.equipment-list .form-check:hover,
+.service-list .form-check:hover {
+    background-color: var(--gray-100);
+}
+
+.equipment-list .form-check-input,
+.service-list .form-check-input {
+    margin-right: 0.5rem;
+}
+
+.equipment-list .form-check-label,
+.service-list .form-check-label {
+    cursor: pointer;
+    user-select: none;
+}
+</style>
+{% endblock %}
